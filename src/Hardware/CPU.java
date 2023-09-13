@@ -1,62 +1,91 @@
 package Hardware;
 
-import java.util.Random;
 import Processes.Process;
 import Processes.PCB;
+import Scheduler.*;
+import utilities.NumberGenerator;
 
 public class CPU {
     private static Integer[] registers;
     private static Integer instructionPointer = 0;
     private static Integer dataPointer = 0; // adresse des donnees en memoire
+    private static Process p;
 
-    public static void execute(Process p) {
+    public static void execute(Process p1) {
+        p = p1;
 
-        p.setState(Process.ProcessState.RUNNING);
-        System.out.println("Process " + p.getProcessID() + " started.");
+        if (p.getCurrentStep() < p.getExecutionTime()) {
+            p.setState(Process.ProcessState.RUNNING);
+            System.out.println("Le processus " + p.getProcessName() + " est en cours d'execution.");
 
-        registers = new Integer[4];
+            registers = new Integer[4];
 
-        for (int i = p.getCurrentStep(); i < p.getExecutionTime(); i++) {
-            Integer[] instruction = p.getInstructions();
+            for (int i = p.getCurrentStep(); i < p.getExecutionTime(); i++) {
+                Integer[] instruction = p.getInstructions();
 
-            // System.out.println(instruction[i]);
-            switch (instruction[i]) {
-                case 0:
-                    p.setState(Process.ProcessState.WAITING);
-                    System.out.println("Process " + p.getProcessID() + " is waiting");
-                    instructionPointer = p.getCurrentStep();
-                    PCB processControlBlock = new PCB(registers, instructionPointer, dataPointer, p);
-                    // save PCB,stop process' execution and put the proccess in waiting list
+                // System.out.println(instruction[i]);
+                switch (instruction[i]) {
+                    case 0:
+                        // Enregistrer le PCB, arreter l'execution du processus, met le processus dans
+                        // la waiting liste
+                        // liberer l'espace memoire occupe par le processus
+                        p.setState(Process.ProcessState.WAITING);
+
+                        instructionPointer = p.getCurrentStep();
+                        PCB processControlBlock = new PCB(registers, instructionPointer, dataPointer, p);
+
+                        ShortTermShceduler.putProcessOnWait(processControlBlock);
+                        LongTermSheduler.freeAllocatedMemorySpace(p);
+                        break;
+
+                    default:
+                        instructionPointer = p.getCurrentStep() + 1;
+                        p.executeStep(instructionPointer);
+
+                        for (int j = 0; j < 4; j++) {
+                            registers[j] = NumberGenerator.generateNumber(100);
+                        }
+
+                        break;
+                }
+                Thread.yield(); // Yield control to other threads
+                if (instruction[i] == 0) {
                     break;
-
-                default:
-                    instructionPointer = p.getCurrentStep() + 1;
-                    p.executeStep(instructionPointer);
-
-                    registers[0] = generateNomber();
-                    registers[1] = generateNomber();
-                    registers[2] = generateNomber();
-                    registers[3] = generateNomber();
-                    break;
+                }
             }
-            Thread.yield(); // Yield control to other threads
-            if (instruction[i] == 0) {
+            if (p.getState() == Process.ProcessState.RUNNING) {
+                terminate(p);
+            }
+        }
+
+    }
+
+    public static void terminate(Process p2) {
+        p2.setState(Process.ProcessState.TERMINATED);
+        System.out.println("Le processus " + p2.getProcessName() + " est terminate.");
+        LongTermSheduler.freeAllocatedMemorySpace(p2);
+    }
+
+    public void runtime(int interruptNumber) {
+        switch (interruptNumber) {
+            case 2:
+                Keyboard.getValue(); // Make sur you have somme values in the keyboard
+                PCB pcb = ShortTermShceduler.retreiveProcess();
+                LongTermSheduler.addProcess(pcb);
+
                 break;
-            }
-        }
-        if (p.getState() == Process.ProcessState.RUNNING) {
-            terminate(p);
-        }
-    }
 
-    public static void terminate(Process p) {
-        p.setState(Process.ProcessState.TERMINATED);
-        System.out.println("Process " + p.getProcessID() + " terminated.");
-    }
+            case 3:
+                System.out.println("Le processus en cours d'execution est: " + p.getProcessName());
+                break;
 
-    private static int generateNomber() {
-        Random random = new Random();
-        return random.nextInt(100); // Adjust range as needed
+            case 4:
+                if (p != null) {
+                    terminate(p);
+                }
+
+                break;
+        }
     }
 
 }

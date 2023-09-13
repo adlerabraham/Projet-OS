@@ -1,27 +1,35 @@
 package Processes;
 
-import java.util.Random;
+import utilities.NumberGenerator;
 
 public class Process {
     private int processID;
     private ProcessState state;
+    private String processName;
     private int executionTime; // utilise aussi comme l'espace memoire requis
     private Integer[] instructions;
+    private Integer[] allocatedMemory;
     private int currentStep;
+    private boolean isMemoryAllocated;
 
-    public Process(int id, int executionTime) {
+    public Process(int id, String processName, int executionTime) {
         this.processID = id;
+        this.processName = processName;
         this.state = ProcessState.NEW;
         this.executionTime = executionTime;
         this.instructions = new Integer[executionTime]; // a remplir avec des nombres aleatoires entre 0 et 5
         for (int i = 0; i < instructions.length; i++)
-            instructions[i] = generateValue();
-
+            instructions[i] = NumberGenerator.generateNumber(6);
+        this.allocatedMemory = new Integer[executionTime];
         this.currentStep = 0;
     }
 
     public int getProcessID() {
         return processID;
+    }
+
+    public String getProcessName() {
+        return processName;
     }
 
     public ProcessState getState() {
@@ -44,19 +52,31 @@ public class Process {
         return this.instructions;
     }
 
+    public Integer[] getAllocatedMemory() {
+        return this.allocatedMemory;
+    }
+
+    public void setAllocatedMemory(int[] tableValue) {
+        for (int i = 0; i < executionTime; i++) {
+            this.allocatedMemory[i] = tableValue[i];
+        }
+    }
+
+    public boolean isMemoryAllocated() {
+        return isMemoryAllocated;
+    }
+
     public void executeStep(int step) {
-        System.out.println("Process " + processID + " executing step " + step + "/" +
+        System.out.println("Process " + processName + " executing step " + step + "/" +
                 executionTime);
         currentStep++;
     }
 
     public enum ProcessState {
-        NEW, READY, RUNNING, WAITING, TERMINATED
+        NEW,
+        READY,
+        RUNNING,
+        WAITING,
+        TERMINATED
     }
-
-    private int generateValue() { // genere un nombre entre 0 et 5
-        Random rand = new Random();
-        return (rand.nextInt(6));
-    }
-
 }
