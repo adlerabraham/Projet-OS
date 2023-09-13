@@ -1,14 +1,17 @@
 package Threads;
 
+import Hardware.CPU;
 import utilities.Event;
 import utilities.NumberGenerator;
 
 public class EventsThread implements Runnable {
 
-    private Event E;
+    private CPU cpuInstance;
 
-    public EventsThread(Event e) {
-        E = e;
+    public EventsThread(CPU cpuParam) {
+        cpuInstance = cpuParam;
+        Thread t = new Thread(this, "EventsThread");
+        t.start();
     }
 
     @Override
@@ -18,21 +21,19 @@ public class EventsThread implements Runnable {
             value = NumberGenerator.generateNumber(6);
 
             if (value == 0 || value == 1) {
-                E.setEventNumber(value);
-                E.setEventType(Event.EventType.CREATION);
-                E.setPriority(true);
+                cpuInstance.setCpuEvent(value, true, Event.EventType.CREATION);
             } else if (value == 2) {
-                E.setEventNumber(value);
-                E.setEventType(Event.EventType.INTERRUPT);
-                E.setPriority(true);
+                cpuInstance.setCpuEvent(value, true, Event.EventType.INTERRUPT);
             } else if (value == 3) {
-                E.setEventNumber(value);
-                E.setEventType(Event.EventType.INTERRUPT);
-                E.setPriority(false);
-            } else {
-                E.setEventNumber(value);
-                E.setEventType(Event.EventType.INTERRUPT);
-                E.setPriority(false);
+                cpuInstance.setCpuEvent(value, false, Event.EventType.INTERRUPT);
+            } else if (value == 4) {
+                cpuInstance.setCpuEvent(value, false, Event.EventType.INTERRUPT);
+            }
+
+            try {
+                Thread.sleep(2000);
+            } catch (Exception e) {
+                System.out.println(e);
             }
         }
     }

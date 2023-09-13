@@ -3,13 +3,17 @@ package Hardware;
 import Processes.Process;
 import Processes.PCB;
 import Scheduler.*;
+import utilities.Event;
 import utilities.NumberGenerator;
+import utilities.Event.EventType;
 
 public class CPU {
     private static Integer[] registers;
     private static Integer instructionPointer = 0;
     private static Integer dataPointer = 0; // adresse des donnees en memoire
     private static Process p;
+    private Event myEvent;
+    private boolean eventSet = false;
 
     public static void execute(Process p1) {
         p = p1;
@@ -86,6 +90,57 @@ public class CPU {
 
                 break;
         }
+    }
+
+    public synchronized void HandleEvent() {
+        // le thread principal attend que l'interrution soit genere
+        while (!eventSet) {
+            try {
+                wait();
+            } catch (Exception e) {
+
+            }
+        }
+
+        // Handle event
+        if (myEvent.getEventType() == EventType.CREATION) {
+            System.out.println("Geting:");
+            System.out.println("Type: " + myEvent.getEventType());
+            System.out.println("Priority: " + myEvent.getPriority());
+            System.out.println("Number: " + myEvent.getEventNumber());
+        } else {
+            System.out.println("Geting:");
+            System.out.println("Type: " + myEvent.getEventType());
+            System.out.println("Priority: " + myEvent.getPriority());
+            System.out.println("Number: " + myEvent.getEventNumber());
+        }
+
+        System.out.println("\n");
+
+        // Donne le controle au thread generateur d'interruption
+        eventSet = false;
+        notify();
+    }
+
+    public synchronized void setCpuEvent(int number, boolean priority, EventType etype) {
+        // Le generateur d'evenement attend que l'interruption soit recuperer
+        while (eventSet) {
+            try {
+                wait();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+
+        System.out.println("Setting " + number);
+        myEvent = new Event();
+        myEvent.setEventNumber(number);
+        myEvent.setEvenType(etype);
+        myEvent.setPriority(priority);
+
+        // Donne le control au thread principal
+        eventSet = true;
+        notify();
     }
 
 }
