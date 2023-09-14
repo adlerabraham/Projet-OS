@@ -51,8 +51,11 @@ public class LongTermSheduler {
         }
 
         if (missedNumberOfFrame == 0) {
-            p.setAllocatedMemory(allocatedFrames); // La methode retourne vrai si l'allocation de memoire
-            return true; // a reussi sinon il retourne faux.
+            // La methode retourne vrai si l'allocation de memoire
+            // a reussi sinon il retourne faux.
+            p.setAllocatedMemory(allocatedFrames);
+            System.out.println("\nL'espace memoire a ete alloue au processus " + p.getProcessName() + " avec succes.");
+            return true;
         } else {
             return false;
         }
@@ -63,5 +66,7 @@ public class LongTermSheduler {
         for (int frame : p.getAllocatedMemory()) {
             Ram.freeFrame(frame);
         }
+        System.out.println(
+                "\nL'espace memoire alloue au processus " + p.getProcessName() + " a ete liberee avec succes.");
     }
 }

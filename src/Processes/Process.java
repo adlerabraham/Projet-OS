@@ -71,7 +71,7 @@ public class Process {
     }
 
     public void executeStep(int step) {
-        System.out.println("Process " + processName + " executing step " + step + "/" +
+        System.out.println("Le process " + processName + " execute l'etape " + step + "/" +
                 executionTime);
         currentStep++;
     }

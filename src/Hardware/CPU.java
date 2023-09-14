@@ -21,20 +21,20 @@ public class CPU {
 
         if (p.getCurrentStep() < p.getExecutionTime()) {
             p.setState(Process.ProcessState.RUNNING);
-            System.out.println("Le processus " + p.getProcessName() + " est en cours d'execution.");
+            System.out.println("\nLe processus " + p.getProcessName() + " est en cours d'execution.");
 
             registers = new Integer[4];
 
             for (int i = p.getCurrentStep(); i < p.getExecutionTime(); i++) {
                 Integer[] instruction = p.getInstructions();
 
-                // System.out.println(instruction[i]);
                 switch (instruction[i]) {
                     case 0:
                         // Enregistrer le PCB, arreter l'execution du processus, met le processus dans
                         // la waiting liste
                         // liberer l'espace memoire occupe par le processus
                         p.setState(Process.ProcessState.WAITING);
+                        p.setCurrentStep(p.getCurrentStep() + 1);
 
                         instructionPointer = p.getCurrentStep();
                         PCB processControlBlock = new PCB(registers, instructionPointer, dataPointer, p);
@@ -43,12 +43,15 @@ public class CPU {
                         LongTermSheduler.freeAllocatedMemorySpace(p);
                         break;
                     case 1:
+                        // Division par zero. On termine le processus
                         System.out.println(
-                                "Exception dans le processus " + p.getProcessName() + ". Il y a une division par zero");
+                                "\nException dans le processus " + p.getProcessName()
+                                        + ". Il y a une division par zero");
                         terminate(p);
 
                         break;
                     default:
+                        // Instruction ordinaire. Execution normale
                         instructionPointer = p.getCurrentStep() + 1;
                         p.executeStep(instructionPointer);
 
@@ -58,11 +61,18 @@ public class CPU {
 
                         break;
                 }
-                Thread.yield(); // Yield control to other threads
+                try {
+                    Thread.sleep(500);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+                // Si le processus a ete mis en attente ou s'il y a une division
+                // par zero, on sort de la boucle d'execution du processus.
                 if (instruction[i] == 0 || instruction[i] == 1) {
                     break;
                 }
             }
+
             if (p.getState() == Process.ProcessState.RUNNING) {
                 terminate(p);
             }
@@ -73,24 +83,41 @@ public class CPU {
     public static void terminate(Process p2) {
         p2.setCurrentStep(p2.getExecutionTime());
         p2.setState(Process.ProcessState.TERMINATED);
-        System.out.println("Le processus " + p2.getProcessName() + " est termine.");
+        System.out.println("\nLe processus " + p2.getProcessName() + " est termine.");
         LongTermSheduler.freeAllocatedMemorySpace(p2);
     }
 
     public void runtime(int interruptNumber) {
         switch (interruptNumber) {
             case 2:
-                Keyboard.getValue(); // Make sur you have somme values in the keyboard
+                Keyboard.getValue();
                 PCB pcb = ShortTermShceduler.retreiveProcess();
+
+                // Verifie s'il y a un processus en attente d'une entree
                 if (pcb != null) {
+                    // Verifie si l'allocation de memoire a reussie
                     if (LongTermSheduler.allocateMemorySpace(pcb.getProcess())) {
                         CPU.execute(pcb.getProcess());
+                    } else {
+                        System.out.println(
+                                "L'allocation de memoire pour le processus " + pcb.getProcessName() + " a echoue.");
                     }
+                } else {
+                    System.out.println("Aucun processus ne necessite une entree pour le moment.");
                 }
                 break;
 
             case 3:
-                System.out.println("ID du processus " + p.getProcessName() + " :" + p.getProcessID());
+                // Verifie s'il y a un processus stocker dans le CPU
+                if (p != null) {
+                    System.out.println("ID du processus: " + p.getProcessID());
+                    System.out.println("Nom du processus:" + p.getProcessName());
+                    System.out.println("Etat du processus: " + p.getState());
+
+                } else {
+                    System.out.println("Attente de la creation d'un processus.");
+                }
+
                 break;
         }
     }
@@ -114,6 +141,8 @@ public class CPU {
             Process p = new Process(index, pName, time);
             if (LongTermSheduler.allocateMemorySpace(p)) {
                 execute(p);
+            } else {
+                System.out.println("L'allocation de memoire pour le processus " + p.getProcessName() + " a echoue.");
             }
         } else {
             runtime(myEvent.getEventNumber());
@@ -136,10 +165,19 @@ public class CPU {
             }
         }
 
-        System.out.println("Setting " + number);
         myEvent = new Event();
         myEvent.setEventNumber(number);
         myEvent.setEvenType(etype);
+        if (etype == Event.EventType.CREATION) {
+            System.out.println("EVENEMENT GENERE: Creation de processus.\n");
+        } else {
+            // Verifie le numero d'interruption generer pour afficher un message.
+            if (number == 2) {
+                System.out.println("EVENEMENT GENERE: Interruption d'entree.\n");
+            } else {
+                System.out.println("EVENEMENT GENERE: Interruption de sortie.\n");
+            }
+        }
 
         // Donne le control au thread principal
         eventSet = true;

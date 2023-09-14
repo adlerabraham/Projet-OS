@@ -3,8 +3,6 @@ package Threads;
 import Hardware.CPU;
 import Hardware.Ram;
 import Scheduler.ShortTermShceduler;
-import utilities.Event;
-import utilities.Event.EventType;
 
 public class MainThread implements Runnable {
 

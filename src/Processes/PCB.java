@@ -56,4 +56,12 @@ public class PCB {
         return p.getProcessName();
     }
 
+    public int getCurrentStep() {
+        return p.getCurrentStep();
+    }
+
+    public int getExecutionTime() {
+        return p.getExecutionTime();
+    }
+
 }

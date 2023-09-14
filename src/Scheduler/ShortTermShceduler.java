@@ -13,7 +13,8 @@ public class ShortTermShceduler {
 
     public static void putProcessOnWait(PCB pcb) {
         waitingList.add(pcb);
-        System.out.println("Process " + pcb.getProcessName() + " is waiting");
+        System.out.println("Le processus " + pcb.getProcessName() + " est en attente a l'etape " +
+                pcb.getCurrentStep() + "/" + pcb.getExecutionTime());
     }
 
     public static PCB retreiveProcess() {

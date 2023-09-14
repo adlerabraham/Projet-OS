@@ -25,41 +25,4 @@ public class Event {
         CREATION
     }
 
-    // public synchronized Event getEvent() {
-    // while (!valueSet) { // le thread principal attend que l'interrution soit
-    // genere
-    // try {
-    // wait();
-    // } catch (Exception e) {
-
-    // }
-    // }
-    // Event e = new Event();
-    // e.eventNumber = eventNumber;
-    // e.masquable = masquable;
-    // e.type = type;
-
-    // valueSet = false;
-    // notify();
-    // return e;
-    // }
-
-    // public synchronized void setEvent(int number, boolean priority, EventType
-    // eType) {
-    // while (valueSet) { // Le generateur d'evenement attend que l'interruption
-    // soit recuperer
-    // try {
-    // wait();
-    // } catch (Exception e) {
-    // //
-    // }
-    // }
-    // eventNumber = number;
-    // masquable = priority;
-    // type = eType;
-
-    // valueSet = true;
-    // notify();
-    // }
-
 }

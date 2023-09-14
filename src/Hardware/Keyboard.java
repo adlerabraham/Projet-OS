@@ -18,31 +18,33 @@ public class Keyboard {
     }
 
     public static String processName() {
-        Scanner clavier = new Scanner(System.in);
-        String pName;
-        System.out.println("Un processus va etre cree.");
-        System.out.println("Entrer un nom pour le processus.");
+        try (Scanner clavier = new Scanner(System.in)) {
+            String pName;
+            System.out.println("Un processus va etre cree.");
+            System.out.println("Entrer un nom pour le processus.");
 
-        do {
-            System.out.println("Il doit avoir moins de onze(11) caracteres.");
-            pName = clavier.nextLine();
+            do {
+                System.out.println("Il doit avoir moins de onze(11) caracteres.");
+                pName = clavier.nextLine();
 
-        } while (pName.length() > 10);
+            } while (pName.length() > 10);
 
-        return pName;
+            return pName;
+        }
 
     }
 
     public static int processTime() {
-        Scanner clavier = new Scanner(System.in);
-        int executionTime;
-        System.out.println("Entrer un temps d'execution pour le processus");
-        do {
-            System.out.println("Entrer un nombre inferieur a 21.");
-            executionTime = clavier.nextInt();
+        try (Scanner clavier = new Scanner(System.in)) {
+            int executionTime;
+            System.out.println("\nEntrer un temps d'execution pour le processus");
+            do {
+                System.out.println("Entrer un nombre inferieur a 21.");
+                executionTime = clavier.nextInt();
 
-        } while (executionTime > 20);
+            } while (executionTime > 20);
 
-        return executionTime;
+            return executionTime;
+        }
     }
 }
