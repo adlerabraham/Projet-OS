@@ -44,17 +44,13 @@ public class PCB {
         return p.getState();
     }
 
-    // public void setState(Process.ProcessState state) {
-    // p.setState(state);
-    // }
-
     public Integer getProcessID() {
         return p.getProcessID();
     }
 
-    // public void setProcessID(Integer processID) {
-    // this.processID = processID;
-    // }
+    public Process getProcess() {
+        return p;
+    }
 
     public String getProcessName() {
         return p.getProcessName();

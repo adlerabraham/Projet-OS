@@ -19,7 +19,7 @@ public class Process {
         this.executionTime = executionTime;
         this.instructions = new Integer[executionTime]; // a remplir avec des nombres aleatoires entre 0 et 5
         for (int i = 0; i < instructions.length; i++)
-            instructions[i] = NumberGenerator.generateNumber(6);
+            instructions[i] = NumberGenerator.generateNumber(10);
         this.allocatedMemory = new Integer[executionTime];
         this.currentStep = 0;
     }
@@ -42,6 +42,10 @@ public class Process {
 
     public int getCurrentStep() {
         return currentStep;
+    }
+
+    public void setCurrentStep(int index) {
+        currentStep = index;
     }
 
     public int getExecutionTime() {

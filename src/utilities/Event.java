@@ -2,7 +2,6 @@ package utilities;
 
 public class Event {
     private int eventNumber;
-    private boolean masquable;
     private EventType type;
 
     public EventType getEventType() {
@@ -19,14 +18,6 @@ public class Event {
 
     public void setEventNumber(int num) {
         eventNumber = num;
-    }
-
-    public boolean getPriority() {
-        return masquable;
-    }
-
-    public void setPriority(boolean priority) {
-        masquable = priority;
     }
 
     public enum EventType {

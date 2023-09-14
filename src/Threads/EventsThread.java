@@ -18,16 +18,14 @@ public class EventsThread implements Runnable {
     public void run() {
         int value;
         while (true) {
-            value = NumberGenerator.generateNumber(6);
+            value = NumberGenerator.generateNumber(4);
 
             if (value == 0 || value == 1) {
-                cpuInstance.setCpuEvent(value, true, Event.EventType.CREATION);
+                cpuInstance.setCpuEvent(value, Event.EventType.CREATION);
             } else if (value == 2) {
-                cpuInstance.setCpuEvent(value, true, Event.EventType.INTERRUPT);
+                cpuInstance.setCpuEvent(value, Event.EventType.INTERRUPT);
             } else if (value == 3) {
-                cpuInstance.setCpuEvent(value, false, Event.EventType.INTERRUPT);
-            } else if (value == 4) {
-                cpuInstance.setCpuEvent(value, false, Event.EventType.INTERRUPT);
+                cpuInstance.setCpuEvent(value, Event.EventType.INTERRUPT);
             }
 
             try {

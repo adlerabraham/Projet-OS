@@ -14,6 +14,7 @@ public class CPU {
     private static Process p;
     private Event myEvent;
     private boolean eventSet = false;
+    private int index = 0;
 
     public static void execute(Process p1) {
         p = p1;
@@ -41,7 +42,12 @@ public class CPU {
                         ShortTermShceduler.putProcessOnWait(processControlBlock);
                         LongTermSheduler.freeAllocatedMemorySpace(p);
                         break;
+                    case 1:
+                        System.out.println(
+                                "Exception dans le processus " + p.getProcessName() + ". Il y a une division par zero");
+                        terminate(p);
 
+                        break;
                     default:
                         instructionPointer = p.getCurrentStep() + 1;
                         p.executeStep(instructionPointer);
@@ -53,7 +59,7 @@ public class CPU {
                         break;
                 }
                 Thread.yield(); // Yield control to other threads
-                if (instruction[i] == 0) {
+                if (instruction[i] == 0 || instruction[i] == 1) {
                     break;
                 }
             }
@@ -65,8 +71,9 @@ public class CPU {
     }
 
     public static void terminate(Process p2) {
+        p2.setCurrentStep(p2.getExecutionTime());
         p2.setState(Process.ProcessState.TERMINATED);
-        System.out.println("Le processus " + p2.getProcessName() + " est terminate.");
+        System.out.println("Le processus " + p2.getProcessName() + " est termine.");
         LongTermSheduler.freeAllocatedMemorySpace(p2);
     }
 
@@ -75,19 +82,15 @@ public class CPU {
             case 2:
                 Keyboard.getValue(); // Make sur you have somme values in the keyboard
                 PCB pcb = ShortTermShceduler.retreiveProcess();
-                LongTermSheduler.addProcess(pcb);
-
+                if (pcb != null) {
+                    if (LongTermSheduler.allocateMemorySpace(pcb.getProcess())) {
+                        CPU.execute(pcb.getProcess());
+                    }
+                }
                 break;
 
             case 3:
-                System.out.println("Le processus en cours d'execution est: " + p.getProcessName());
-                break;
-
-            case 4:
-                if (p != null) {
-                    terminate(p);
-                }
-
+                System.out.println("ID du processus " + p.getProcessName() + " :" + p.getProcessID());
                 break;
         }
     }
@@ -98,21 +101,22 @@ public class CPU {
             try {
                 wait();
             } catch (Exception e) {
-
+                System.out.println(e);
             }
         }
 
         // Handle event
         if (myEvent.getEventType() == EventType.CREATION) {
-            System.out.println("Geting:");
-            System.out.println("Type: " + myEvent.getEventType());
-            System.out.println("Priority: " + myEvent.getPriority());
-            System.out.println("Number: " + myEvent.getEventNumber());
+            index++;
+            String pName = Keyboard.processName();
+            int time = Keyboard.processTime();
+
+            Process p = new Process(index, pName, time);
+            if (LongTermSheduler.allocateMemorySpace(p)) {
+                execute(p);
+            }
         } else {
-            System.out.println("Geting:");
-            System.out.println("Type: " + myEvent.getEventType());
-            System.out.println("Priority: " + myEvent.getPriority());
-            System.out.println("Number: " + myEvent.getEventNumber());
+            runtime(myEvent.getEventNumber());
         }
 
         System.out.println("\n");
@@ -122,7 +126,7 @@ public class CPU {
         notify();
     }
 
-    public synchronized void setCpuEvent(int number, boolean priority, EventType etype) {
+    public synchronized void setCpuEvent(int number, EventType etype) {
         // Le generateur d'evenement attend que l'interruption soit recuperer
         while (eventSet) {
             try {
@@ -136,7 +140,6 @@ public class CPU {
         myEvent = new Event();
         myEvent.setEventNumber(number);
         myEvent.setEvenType(etype);
-        myEvent.setPriority(priority);
 
         // Donne le control au thread principal
         eventSet = true;
