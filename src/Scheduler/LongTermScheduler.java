@@ -7,11 +7,11 @@ import Hardware.Ram;
 import Processes.Process;
 import Processes.PCB;
 
-public class LongTermSheduler {
+public class LongTermScheduler {
 
     private static Queue<PCB> readyQueue = new LinkedList<>();
 
-    public LongTermSheduler() {
+    public LongTermScheduler() {
 
     }
 

@@ -40,7 +40,7 @@ public class CPU {
                         PCB processControlBlock = new PCB(registers, instructionPointer, dataPointer, p);
 
                         ShortTermShceduler.putProcessOnWait(processControlBlock);
-                        LongTermSheduler.freeAllocatedMemorySpace(p);
+                        LongTermScheduler.freeAllocatedMemorySpace(p);
                         break;
                     case 1:
                         // Division par zero. On termine le processus
@@ -84,7 +84,7 @@ public class CPU {
         p2.setCurrentStep(p2.getExecutionTime());
         p2.setState(Process.ProcessState.TERMINATED);
         System.out.println("\nLe processus " + p2.getProcessName() + " est termine.");
-        LongTermSheduler.freeAllocatedMemorySpace(p2);
+        LongTermScheduler.freeAllocatedMemorySpace(p2);
     }
 
     public void runtime(int interruptNumber) {
@@ -96,11 +96,14 @@ public class CPU {
                 // Verifie s'il y a un processus en attente d'une entree
                 if (pcb != null) {
                     // Verifie si l'allocation de memoire a reussie
-                    if (LongTermSheduler.allocateMemorySpace(pcb.getProcess())) {
+                    if (LongTermScheduler.allocateMemorySpace(pcb.getProcess())) {
+                        pcb.getProcess().setState(Process.ProcessState.READY);
                         CPU.execute(pcb.getProcess());
                     } else {
                         System.out.println(
                                 "L'allocation de memoire pour le processus " + pcb.getProcessName() + " a echoue.");
+
+                        ShortTermShceduler.putProcessOnWait(pcb);
                     }
                 } else {
                     System.out.println("Aucun processus ne necessite une entree pour le moment.");
@@ -139,10 +142,15 @@ public class CPU {
             int time = Keyboard.processTime();
 
             Process p = new Process(index, pName, time);
-            if (LongTermSheduler.allocateMemorySpace(p)) {
+            if (LongTermScheduler.allocateMemorySpace(p)) {
                 execute(p);
             } else {
                 System.out.println("L'allocation de memoire pour le processus " + p.getProcessName() + " a echoue.");
+
+                p.setState(Process.ProcessState.WAITING);
+                PCB processControlBlock = new PCB(registers, 0, 0, p);
+
+                ShortTermShceduler.putProcessOnWait(processControlBlock);
             }
         } else {
             runtime(myEvent.getEventNumber());

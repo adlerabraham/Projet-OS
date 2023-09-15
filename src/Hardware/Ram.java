@@ -6,7 +6,7 @@ public class Ram {
 
     public Ram() {
         memory = new int[1024][1024];
-        frames = new Frame[8192]; // 8192
+        frames = new Frame[8192];
         createFrames();
     }
 
